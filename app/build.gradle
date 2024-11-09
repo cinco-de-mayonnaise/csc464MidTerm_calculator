@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("org.javacc.javacc") version "3.0.2"
 }
 
 android {

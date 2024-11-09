@@ -1,0 +1,412 @@
+PARSER_BEGIN(CalculatorParser)
+
+package com.abdullah.beginner.csc464midterm_calculator;
+
+import java.math.*;
+
+public class CalculatorParser {
+
+    private enum FunctionType {
+        FUNCTION_SIN, FUNCTION_COS, FUNCTION_TAN, FUNCTION_ABS, FUNCTION_SQRT, FUNCTION_EXP, FUNCTION_LOG, FUNCTION_LN
+    }
+
+    private static boolean __allInstanceOf(Class<?> cls, Object... objs) {
+        for (Object o : objs) {
+            if (!cls.isInstance(o)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static double[] __promoteResultsToDouble(Result... values) {
+        double[] arr = new double[values.length];
+
+        for (int i = 0; i < values.length; i++)
+            arr[i] = values[i].getValue().doubleValue();
+
+        return arr;
+    }
+
+    private static Result __addition(Result v1, Result v2) {
+        if (__allInstanceOf(Long.class, v2.getValue(), v1.getValue()))
+        {
+            try {
+                v1 = new Result(Math.addExact(v2.getValue().longValue(), v1.getValue().longValue()));
+
+                return v1;
+            }
+            catch (ArithmeticException e)
+            {
+                // overflow, turn result into double... (in the future we will convert this to big int)
+            }
+        }
+
+        double sum = 0;
+        for (double v: __promoteResultsToDouble(v2, v1))
+            sum += v;
+
+        v1 = new Result(sum);
+
+        return v1;
+    }
+
+    private static Result __subtraction(Result v1, Result v2) {
+        // check if datatypes are same
+        if (__allInstanceOf(Long.class, v2.getValue(), v1.getValue()))
+        {
+            try {
+                v1 = new Result(Math.addExact(v1.getValue().longValue(), -v2.getValue().longValue()));
+
+                return v1;
+            }
+            catch (ArithmeticException e)
+            {
+                // overflow, turn result into double... (in the future we will convert this to big int)
+            }
+        }
+
+        double[] values = __promoteResultsToDouble(v1, v2);
+
+        v1 = new Result(values[0] - values[1]);
+        return v1;
+    }
+
+    private static Result __multiplication(Result v1, Result v2)
+    {
+        // check if datatypes are same
+        if (__allInstanceOf(Long.class, v2.getValue(), v1.getValue()))
+        {
+            try {
+                v1 = new Result(Math.multiplyExact(v2.getValue().longValue(), v1.getValue().longValue()));
+
+                return v1;
+            }
+            catch (ArithmeticException e)
+            {
+                // overflow, turn result into double... (in the future we will convert this to big int)
+            }
+        }
+
+        double[] values = __promoteResultsToDouble(v1, v2);
+        v1 = new Result(values[0] * values[1]);
+
+        return v1;
+    }
+
+    private static Result __exponential(Result v1, Result v2)
+    {
+        // check if datatypes are same
+        if (__allInstanceOf(Long.class, v2.getValue(), v1.getValue()))
+        {
+            try {
+                v1 = new Result((long)Math.pow(v1.getValue().doubleValue(), v2.getValue().doubleValue()));
+
+                return v1;
+            }
+            catch (ArithmeticException e)
+            {
+                // overflow, turn result into double... (in the future we will convert this to big int)
+            }
+        }
+
+        double[] values = __promoteResultsToDouble(v1, v2);
+        v1 = new Result(Math.pow(values[0], values[1]));
+
+        return v1;
+    }
+
+    private static Result __division(Result v1, Result v2) throws ArithmeticException
+    {
+        // check if datatypes are same
+        if (__allInstanceOf(Long.class, v2.getValue(), v1.getValue()))
+        {
+            try {
+                long val1 = v1.getValue().longValue();
+                long val2 = v2.getValue().longValue();
+
+                if (val1 % val2 != 0)
+                    throw new ArithmeticException("Should handover this case to double!");
+
+                return new Result(val1 / val2);   // also passes divide by 0 to double, which then gets handled by the double-case
+            }
+            catch (ArithmeticException e)
+            {
+                // overflow, turn result into double... (in the future we will convert this to big int)
+            }
+        }
+
+        double[] values = __promoteResultsToDouble(v1, v2);
+
+//        if (values[1] == 0.0)
+//            throw new ParseException("Divide by zero!");     // let Java throw the error
+        v1 = new Result(values[0] / values[1]);
+
+        return v1;
+    }
+
+    private static Result __modulo(Result v1, Result v2) throws ArithmeticException
+    {
+        // check if datatypes are same
+        if (__allInstanceOf(Long.class, v2.getValue(), v1.getValue()))
+        {
+            try {
+                long val1 = v1.getValue().longValue();
+                long val2 = v2.getValue().longValue();
+
+                return new Result(val1 % val2);
+            }
+            catch (ArithmeticException e)
+            {
+                // overflow, turn result into double... (in the future we will convert this to big int)
+            }
+        }
+
+        double[] values = __promoteResultsToDouble(v1, v2);
+
+//        if (values[1] == 0.0)
+//            throw new ParseException("Divide by zero!");    // let java throw error
+        v1 = new Result(values[0] % values[1]);
+
+        return v1;
+    }
+
+    private static Result __apply_function(Result v, FunctionType f) throws IllegalArgumentException
+    {
+        double ret;
+        switch (f)
+        {
+            case FUNCTION_ABS:
+                if (v.getType() == Long.class)
+                    return new Result(Math.abs(v.getValue().longValue()));
+                else if (v.getType() == Double.class)
+                    return new Result(Math.abs(v.getValue().doubleValue()));
+                throw new IllegalStateException("Code needs to be updated: Result value was neither Long or Double");
+            case FUNCTION_SIN:
+                ret = Math.sin(v.getValue().doubleValue());
+                break;
+            case FUNCTION_COS:
+                ret = Math.cos(v.getValue().doubleValue());
+                break;
+            case FUNCTION_TAN:
+                ret = Math.tan(v.getValue().doubleValue());
+                break;
+            case FUNCTION_EXP:
+                ret = Math.exp(v.getValue().doubleValue());
+                break;
+            case FUNCTION_SQRT:
+                ret = Math.sqrt(v.getValue().doubleValue());
+                break;
+            case FUNCTION_LOG:
+                ret = Math.log10(v.getValue().doubleValue());
+                break;
+            case FUNCTION_LN:
+                ret = Math.log(v.getValue().doubleValue());
+                break;
+            default:
+                throw new IllegalArgumentException("Not Implemented");
+        }
+
+        if (ret % 1 == 0.0)
+            return new Result((long)ret);
+        else
+            return new Result(ret);
+    }
+
+
+}
+
+PARSER_END(CalculatorParser)
+
+SKIP : {
+    " "
+|   "\t"
+|   "\n"
+|   "\r"
+}
+
+TOKEN : {
+    < NUMBER_FP: <DIGITS> "." <DIGITS>>
+|   < NUMBER_INT: <DIGITS>>
+|   < PLUS: "+" >
+|   < MINUS: "-" >
+|   < MULTIPLY: "*" >
+|   < DIVIDE: "/" >
+|   < MODULO: "%" >
+|   < POWER: "^" >
+|   < LPAREN: "(" >
+|   < RPAREN: ")" >
+|   < FUNCTION_SIN: "sin" >
+|   < FUNCTION_COS: "cos" >
+|   < FUNCTION_TAN: "tan" >
+|   < FUNCTION_ABS: "abs" >
+|   < FUNCTION_SQRT: "sqrt" >
+|   < FUNCTION_EXP: "exp" >
+|   < FUNCTION_LOG: "log" >
+|   < FUNCTION_LN: "ln" >
+|   < CONST_PI: "π" >
+|   < CONST_E: "e" >
+|   < DIGITS: (["0"-"9"])+ >
+}
+
+
+public Result Start() : {
+    Result value;
+}
+{
+    value = Expression() <EOF>
+    {
+        //System.out.println(value.getValue());
+        //return jjtThis;  // DEBUG
+        return value;
+    }
+}
+
+Result Expression() : {
+    Result value;
+    Result temp;
+}
+{
+    (value = Term1())
+    [
+        /* Here ambiguity doesnt matter cause 3+4-5 == 3+(4-5) == (3+4)-5*/
+        (<PLUS> temp = Expression()
+            {
+                value = __addition(value, temp);
+            }
+        )
+        | (<MINUS> temp = Expression()
+            {
+                value = __subtraction(value, temp);
+            }
+        )
+    ]
+    { return value;}
+}
+
+Result Term1() : {
+    Result value;
+    Result temp;
+}
+{
+    (value = Term2())
+    [
+        /* MISTAKE FOUND: problem is multiply and divide do not have equal priority, you should always divide first. */
+        /* Here ambiguity does matter cause 3/4*5 ?? 3/(4*5) != (3/4)*5 */
+        <MULTIPLY> temp = Term1()
+        {
+            value = __multiplication(value, temp);
+        }
+    ]
+    { return value;}
+}
+
+Result Term2() : {
+    Result value;
+    Result temp;
+}
+{
+    (value = Factor())
+    [
+        /* Here ambiguity does matter ... But we are not sure of the precedence of modulo */
+        (<DIVIDE> temp = Term2()
+            {
+                value = __division(value, temp);
+            }
+        )
+        | (<MODULO> temp = Term2()
+             {
+                 value = __modulo(value, temp);
+             }
+         )
+    ]
+    { return value;}
+}
+
+Result Factor() : {
+    Result value;
+    Result temp;
+}
+{
+    (value = Exponential())
+    [
+        /* Here ambiguity does matter ... But we are not sure of the precedence of modulo */
+        <POWER> temp = Factor()
+        {
+            value = __exponential(value, temp);
+        }
+    ]
+    { return value;}
+}
+
+Result Exponential() : {
+    Result value;
+}
+{
+    (
+        ( <LPAREN> (value = Expression()) <RPAREN> )
+        |
+        ( value = Value() )
+    )
+    { return value;}
+}
+
+Result Value() : {
+    Result value;
+    Result temp;
+    int sign = 1;
+    FunctionType function_call;
+}
+{
+    [<MINUS> { sign = -1;}]
+    (
+        (( function_call = Function() ) <LPAREN> (temp = Expression()) <RPAREN>   {value = __apply_function(temp, function_call);})
+        |
+        ( value = Number() )
+        |
+        ( <CONST_PI> {value = new Result(Math.PI * sign); sign = 1;})
+        |
+        ( <CONST_E>  {value = new Result(Math.E  * sign); sign = 1;})
+    )
+    {
+        if (sign == -1)
+        {
+            Number n = value.getValue();
+            if (value.getType() == Long.class)
+                value = new Result(n.longValue() * -1);
+            else if (value.getType() == Double.class)
+                value = new Result(n.doubleValue() * -1);
+            else
+                throw new IllegalStateException("Code needs to be updated: Result value was neither Long or Double");
+
+
+        }
+        return value;
+    }
+}
+
+FunctionType Function() : {
+
+}
+{
+    ( <FUNCTION_ABS>    {return FunctionType.FUNCTION_ABS;})
+    | ( <FUNCTION_SIN>  {return FunctionType.FUNCTION_SIN;})
+    | ( <FUNCTION_COS>  {return FunctionType.FUNCTION_COS;})
+    | ( <FUNCTION_TAN>  {return FunctionType.FUNCTION_TAN;})
+    | ( <FUNCTION_EXP>  {return FunctionType.FUNCTION_EXP;})
+    | ( <FUNCTION_LN>   {return FunctionType.FUNCTION_LN; })
+    | ( <FUNCTION_LOG>  {return FunctionType.FUNCTION_LOG;})
+    | ( <FUNCTION_SQRT> {return FunctionType.FUNCTION_SQRT;})
+}
+
+Result Number() : {
+    Result value;
+    Token t;
+}
+{
+    (
+        t = <NUMBER_FP>     { value = new Result(Double.parseDouble(t.image));  }
+        | t = <NUMBER_INT>  { value = new Result(Long.parseLong(t.image)); }
+    )
+    { return value; }
+}
