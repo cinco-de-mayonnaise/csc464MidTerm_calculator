@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.databinding.DataBindingUtil;
 
+import com.abdullah.beginner.csc464midterm_calculator.databinding.ActivityLandscapeBinding;
 import com.abdullah.beginner.csc464midterm_calculator.databinding.ActivityPortraitBinding;
 
 import org.javacc.jjtree.Main;
@@ -19,7 +20,7 @@ import org.javacc.jjtree.Main;
 public class MainActivity extends AppCompatActivity {
 
     ActivityPortraitBinding portrait_binding = null;
-    ActivityPortraitBinding landscape_binding = null;
+    ActivityLandscapeBinding landscape_binding = null;
 
     private int setViewsAndBindings(@NonNull Configuration newConfig)
     {
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         {
             // load landscape layout
             // will crash lul
-            landscape_binding =  DataBindingUtil.setContentView(this, 500);
+            landscape_binding =  DataBindingUtil.setContentView(this, R.layout.activity_landscape);
             portrait_binding = null;
         }
         else
@@ -47,16 +48,29 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
         int cur_orientation = setViewsAndBindings(newConfig);
 
+        // do we need to do anything?
+        if (cur_orientation == Configuration.ORIENTATION_PORTRAIT)
+            portrait_binding.calculationWorkspaceEditText.setShowSoftInputOnFocus(false);
+        else
+            landscape_binding.calculationWorkspaceEditText.setShowSoftInputOnFocus(false);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         int cur_orientation = setViewsAndBindings(this.getResources().getConfiguration());   // set Views and Bindings based on current orientation, this is called everytime we rotate screen
 
         // required to prevent keyboard being active when edittext is touched
-        portrait_binding.calculationWorkspaceEditText.setShowSoftInputOnFocus(false);
+        if (cur_orientation == Configuration.ORIENTATION_PORTRAIT)
+            portrait_binding.calculationWorkspaceEditText.setShowSoftInputOnFocus(false);
+        else
+            landscape_binding.calculationWorkspaceEditText.setShowSoftInputOnFocus(false);
+
+        if (savedInstanceState != null)
+        {
+            // get previous string loaded into textfield.
+            String previousInput = savedInstanceState.getString("previousInput");
+        }
 
         EdgeToEdge.enable(this);
 

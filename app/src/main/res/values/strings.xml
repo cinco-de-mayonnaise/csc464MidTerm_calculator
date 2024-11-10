@@ -18,11 +18,34 @@
     <string name="key_div">÷</string>
     <string name="key_lparen">(</string>
     <string name="key_rparen">)</string>
+    <string name="key_mod">%</string>
+    <string name="key_pow">xʸ</string>
+    <string name="key_pow2">x²</string>
+    <string name="key_exp10">10ˣ</string>
+
+    <!-- Functions -->
+    <string name="key_abs">|□|</string>
+    <string name="key_sin">sin</string>
+    <string name="key_cos">cos</string>
+    <string name="key_tan">tan</string>
+    <string name="key_sqrt">√</string>
+    <string name="key_cbrt">∛</string>
+    <string name="key_exp">exp</string>
+    <string name="key_log">log₁₀</string>
+    <string name="key_ln">ln</string>
+    <string name="key_fact">!</string>
+
+    <!-- Constants -->
+    <string name="key_pi">π</string>
+    <string name="key_e">e</string>
+
 
     <!-- Other keys -->
     <string name="key_dot">.</string>
     <string name="key_bksp">⌫</string>
     <string name="key_reset">C</string>
     <string name="key_eq">=</string>
-    <string name="key_adv">Science</string>
+    <string name="key_ans">Ans</string>
+    <string name="key_help">Help</string>
+    <string name="key_hist">History</string>
 </resources>

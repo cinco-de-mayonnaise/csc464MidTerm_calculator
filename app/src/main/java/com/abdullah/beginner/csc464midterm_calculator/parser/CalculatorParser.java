@@ -486,7 +486,13 @@ value = new Result(Double.parseDouble(t.image));
       }
     case NUMBER_INT:{
       t = jj_consume_token(NUMBER_INT);
-value = new Result(Long.parseLong(t.image));
+      try {
+          value = new Result(Long.parseLong(t.image));
+      }
+      catch(NumberFormatException n)
+      {// FIND ME FIX
+          value = new Result(Double.parseDouble(t.image));
+      }
       break;
       }
     default:
